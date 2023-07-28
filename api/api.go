@@ -59,6 +59,9 @@ func New(backend *backend.Dependency) *Server {
 
 	server.app.Get("/", server.Health)
 
+	server.app.Post("/auth/register", server.Register)
+	server.app.Post("/auth/login", server.Login)
+
 	return server
 }
 

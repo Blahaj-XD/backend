@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS kids(
   "nik" varchar(255) NOT NULL,
   "full_name" varchar(255) NOT NULL,
   "domisili" varchar(255) NOT NULL,
-  "tanggal_lahir" date NOT NULL,
+  "tanggal_lahir" varchar(255) NOT NULL,
   "jenis_kelamin" smallint NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT NOW(),
   FOREIGN KEY (parent_id) REFERENCES parents(id) ON DELETE CASCADE
@@ -43,18 +43,20 @@ CREATE TABLE IF NOT EXISTS goals(
 
 CREATE TABLE IF NOT EXISTS quests(
   "id" serial PRIMARY KEY,
+  "parent_id" int NOT NULL,
   "title" varchar(255) NOT NULL,
   "description" varchar(255) NOT NULL,
   "reward" decimal NOT NULL,
+  "status" smallint NOT NULL, -- 0: available, 1: ongoing, 2: done, 3: canceled, 4: expired
   "start_date" timestamptz NOT NULL,
   "end_date" timestamptz NOT NULL,
-  "created_at" timestamptz NOT NULL DEFAULT NOW()
+  "created_at" timestamptz NOT NULL DEFAULT NOW(),
+  FOREIGN KEY (parent_id) REFERENCES parents(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS kid_assigned_quests(
   "kid_id" int NOT NULL,
   "quest_id" int NOT NULL,
-  "status" smallint NOT NULL, -- 0: pending, 1: done, 2: failed
   "created_at" timestamptz NOT NULL DEFAULT NOW(),
   PRIMARY KEY (kid_id, quest_id),
   FOREIGN KEY (kid_id) REFERENCES kids(id) ON DELETE CASCADE,

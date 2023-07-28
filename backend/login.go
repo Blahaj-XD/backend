@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/BlahajXD/backend/logic"
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -37,7 +38,7 @@ type LoginOutput struct {
 func (d *Dependency) Login(ctx context.Context, input LoginInput) (LoginOutput, error) {
 	user, err := d.repo.FindParent(ctx, "username", input.Username)
 	if err != nil {
-		return LoginOutput{}, err
+		return LoginOutput{}, errors.Wrap(err, "backend.Login -> repo.FindParent")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {

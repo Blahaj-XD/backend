@@ -5,16 +5,12 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
 	"github.com/BlahajXD/backend/backend"
 	"github.com/BlahajXD/backend/config"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/helmet"
-	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/rs/zerolog/log"
 )
 
@@ -35,32 +31,7 @@ func New(backend *backend.Dependency) *Server {
 		backend: backend,
 	}
 
-	corsMiddleware := cors.New(cors.Config{
-		AllowOrigins: "*",
-		AllowMethods: strings.Join([]string{
-			fiber.MethodGet,
-			fiber.MethodPost,
-			fiber.MethodPatch,
-			fiber.MethodPut,
-			fiber.MethodDelete,
-			fiber.MethodHead,
-			fiber.MethodOptions,
-		}, ","),
-		AllowHeaders: strings.Join([]string{
-			fiber.HeaderAuthorization,
-			fiber.HeaderContentType,
-			fiber.HeaderAccept,
-		}, ","),
-	})
-
-	server.app.Use(helmet.New())
-	server.app.Use(recover.New())
-	server.app.Use(corsMiddleware)
-
-	server.app.Get("/", server.Health)
-
-	server.app.Post("/auth/register", server.Register)
-	server.app.Post("/auth/login", server.Login)
+	server.SetupRoutes()
 
 	return server
 }

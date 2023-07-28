@@ -5,6 +5,7 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/pkg/errors"
 )
 
 type Parent struct {
@@ -55,13 +56,13 @@ func (d *Dependency) SaveParent(ctx context.Context, params Parent) (int, error)
 
 	sql, args, err := query.ToSql()
 	if err != nil {
-		return 0, err
+		return 0, errors.Wrap(err, "repo.SaveParent: ToSql")
 	}
 
 	var id int
 
 	if err := d.db.QueryRow(ctx, sql, args...).Scan(&id); err != nil {
-		return 0, err
+		return 0, errors.Wrap(err, "repo.SaveParent: QueryRow")
 	}
 
 	return id, nil

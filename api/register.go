@@ -27,15 +27,12 @@ type RegisterBody struct {
 
 func (s *Server) Register(c *fiber.Ctx) error {
 	var body RegisterBody
-
 	if err := c.BodyParser(&body); err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
 	if err := body.Validate(); err != nil {
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return fiber.NewError(fiber.StatusUnprocessableEntity, err.Error())
 	}
 
 	output, err := s.backend.SaveParent(c.Context(), backend.SaveParentInput{

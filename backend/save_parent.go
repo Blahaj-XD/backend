@@ -6,6 +6,7 @@ import (
 
 	"github.com/BlahajXD/backend/logic"
 	"github.com/BlahajXD/backend/repo"
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -72,12 +73,12 @@ func (d *Dependency) SaveParent(ctx context.Context, input SaveParentInput) (Sav
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return SaveParentOutput{}, err
+		return SaveParentOutput{}, errors.Wrap(err, "backend.SaveParent: bcrypt.GenerateFromPassword")
 	}
 
 	input.Password = string(hashedPassword)
 	now := time.Now()
-	userID, err := d.repo.SaveParent(ctx, repo.Parent{
+	params := repo.Parent{
 		NIK:          input.NIK,
 		Username:     input.Username,
 		Email:        input.Email,
@@ -93,9 +94,11 @@ func (d *Dependency) SaveParent(ctx context.Context, input SaveParentInput) (Sav
 		Kecamatan:    input.Kecamatan,
 		Pekerjaan:    input.Pekerjaan,
 		CreatedAt:    now,
-	})
+	}
+
+	userID, err := d.repo.SaveParent(ctx, params)
 	if err != nil {
-		return SaveParentOutput{}, err
+		return SaveParentOutput{}, errors.Wrap(err, "backend.SaveParent -> d.repo.SaveParent")
 	}
 
 	accessToken, err := logic.GenerateJWT(map[string]any{
@@ -103,7 +106,7 @@ func (d *Dependency) SaveParent(ctx context.Context, input SaveParentInput) (Sav
 		"email":  input.Email,
 	})
 	if err != nil {
-		return SaveParentOutput{}, err
+		return SaveParentOutput{}, errors.Wrap(err, "backend.SaveParent -> logic.GenerateJWT")
 	}
 
 	var output SaveParentOutput

@@ -9,30 +9,36 @@ import (
 )
 
 type Parent struct {
-	ID           int
-	NIK          string
-	Username     string
-	Email        string
-	Password     string `json:"-"`
-	PhoneNumber  string
-	FullName     string
-	Domisili     string
-	TanggalLahir string
-	JenisKelamin int
-	Alamat       string
-	RtRW         string
-	Kelurahan    string
-	Kecamatan    string
-	Pekerjaan    string
-	CreatedAt    time.Time
+	ID            int
+	UID           int
+	AccountNumber string
+	NIK           string
+	Username      string
+	Email         string
+	Pin           string `json:"-"`
+	Password      string `json:"-"`
+	PhoneNumber   string
+	FullName      string
+	Domisili      string
+	TanggalLahir  string
+	JenisKelamin  int
+	Alamat        string
+	RtRW          string
+	Kelurahan     string
+	Kecamatan     string
+	Pekerjaan     string
+	CreatedAt     time.Time
 }
 
 func (d *Dependency) SaveParent(ctx context.Context, params Parent) (int, error) {
 	qb := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 	cols := []string{
+		"uid",
+		"account_number",
 		"nik",
 		"username",
 		"email",
+		"pin",
 		"password",
 		"phone_number",
 		"full_name",
@@ -49,8 +55,10 @@ func (d *Dependency) SaveParent(ctx context.Context, params Parent) (int, error)
 	query := qb.Insert("parents").
 		Columns(cols...).
 		Values(
-			params.NIK, params.Username, params.Email, params.Password, params.PhoneNumber, params.FullName, params.Domisili, params.TanggalLahir,
-			params.JenisKelamin, params.Alamat, params.RtRW, params.Kelurahan,
+			params.UID, params.AccountNumber, params.NIK, params.Username, params.Email,
+			params.Pin, params.Password, params.PhoneNumber, params.FullName,
+			params.Domisili, params.TanggalLahir, params.JenisKelamin,
+			params.Alamat, params.RtRW, params.Kelurahan,
 			params.Kecamatan, params.Pekerjaan, params.CreatedAt).
 		Suffix("RETURNING \"id\"")
 
@@ -73,6 +81,8 @@ func (d *Dependency) FindParent(ctx context.Context, col string, value any) (Par
 
 	cols := []string{
 		"id",
+		"uid",
+		"account_number",
 		"nik",
 		"username",
 		"email",
@@ -101,7 +111,8 @@ func (d *Dependency) FindParent(ctx context.Context, col string, value any) (Par
 	var parent Parent
 
 	if err := d.db.QueryRow(ctx, sql, args...).Scan(
-		&parent.ID, &parent.NIK, &parent.Username, &parent.Email, &parent.Password, &parent.PhoneNumber,
+		&parent.ID, &parent.UID, &parent.AccountNumber,
+		&parent.NIK, &parent.Username, &parent.Email, &parent.Password, &parent.PhoneNumber,
 		&parent.FullName, &parent.Domisili, &parent.TanggalLahir, &parent.JenisKelamin,
 		&parent.Alamat, &parent.RtRW, &parent.Kelurahan, &parent.Kecamatan,
 		&parent.Pekerjaan, &parent.CreatedAt); err != nil {

@@ -1,9 +1,12 @@
 CREATE TABLE IF NOT EXISTS parents(
   "id" serial PRIMARY KEY,
+  "uid" int NOT NULL,
+  "account_number" varchar(255) NOT NULL,
   "nik" varchar(255) NOT NULL UNIQUE,
   "username" varchar(255) NOT NULL UNIQUE,
   "email" varchar(255) NOT NULL UNIQUE,
   "password" varchar(255) NOT NULL,
+  "pin" varchar(255) NOT NULL,
   "phone_number" varchar(255) NOT NULL,
   "full_name" varchar(255) NOT NULL,
   "domisili" varchar(255) NOT NULL,
@@ -20,6 +23,7 @@ CREATE TABLE IF NOT EXISTS parents(
 CREATE TABLE IF NOT EXISTS kids(
   "id" serial PRIMARY KEY,
   "parent_id" int NOT NULL,
+  "account_number" varchar(255) NOT NULL,
   "nik" varchar(255) NOT NULL,
   "full_name" varchar(255) NOT NULL,
   "domisili" varchar(255) NOT NULL,
@@ -32,6 +36,7 @@ CREATE TABLE IF NOT EXISTS kids(
 CREATE TABLE IF NOT EXISTS goals(
   "id" serial PRIMARY KEY,
   "kid_id" int NOT NULL,
+  "account_number" varchar(255) NOT NULL,
   "title" varchar(255) NOT NULL,
   "description" varchar(255) NOT NULL,
   "target_amount" decimal NOT NULL,

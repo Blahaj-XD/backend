@@ -17,6 +17,7 @@ type ParentAdminAddKidBody struct {
 
 func (s *Server) ParentAdminAddKid(c *fiber.Ctx) error {
 	var body ParentAdminAddKidBody
+	parentID := int(c.Locals("userID").(float64))
 	if err := c.BodyParser(&body); err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
@@ -25,13 +26,22 @@ func (s *Server) ParentAdminAddKid(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusUnprocessableEntity, err.Error())
 	}
 
+	accountNumber, err := s.backend.HackathonCreateBankAccount(backend.HackathonCreateBankAccountInput{
+		Balance:     0,
+		AccessToken: c.Locals("hackathonAccessToken").(string),
+	})
+	if err != nil {
+		return fiber.NewError(fiber.StatusServiceUnavailable, err.Error())
+	}
+
 	kid, err := s.backend.AddKid(c.Context(), backend.ParentAdminAddKidInput{
-		ParentID:     int(c.Locals("userID").(float64)),
-		NIK:          body.NIK,
-		FullName:     body.FullName,
-		Domisili:     body.Domisili,
-		TanggalLahir: body.TanggalLahir,
-		JenisKelamin: body.JenisKelamin,
+		ParentID:      parentID,
+		AccountNumber: accountNumber,
+		NIK:           body.NIK,
+		FullName:      body.FullName,
+		Domisili:      body.Domisili,
+		TanggalLahir:  body.TanggalLahir,
+		JenisKelamin:  body.JenisKelamin,
 	})
 	if err != nil {
 		if errors.Is(err, backend.ErrKidAlreadyExists) {

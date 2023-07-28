@@ -9,23 +9,25 @@ import (
 )
 
 type ParentAdminAddKidInput struct {
-	ParentID     int    `json:"parent_id"`
-	NIK          string `json:"nik"`
-	FullName     string `json:"full_name"`
-	Domisili     string `json:"domisili"`
-	TanggalLahir string `json:"tanggal_lahir"`
-	JenisKelamin int    `json:"jenis_kelamin"`
+	ParentID      int    `json:"parent_id"`
+	AccountNumber string `json:"account_number"`
+	NIK           string `json:"nik"`
+	FullName      string `json:"full_name"`
+	Domisili      string `json:"domisili"`
+	TanggalLahir  string `json:"tanggal_lahir"`
+	JenisKelamin  int    `json:"jenis_kelamin"`
 }
 
 type ParentAdminAddKidOutput struct {
-	ID           int       `json:"id"`
-	ParentID     int       `json:"parent_id"`
-	NIK          string    `json:"nik"`
-	FullName     string    `json:"full_name"`
-	Domisili     string    `json:"domisili"`
-	TanggalLahir string    `json:"tanggal_lahir"`
-	JenisKelamin int       `json:"jenis_kelamin"`
-	CreatedAt    time.Time `json:"created_at"`
+	ID            int       `json:"id"`
+	ParentID      int       `json:"parent_id"`
+	AccountNumber string    `json:"account_number"`
+	NIK           string    `json:"nik"`
+	FullName      string    `json:"full_name"`
+	Domisili      string    `json:"domisili"`
+	TanggalLahir  string    `json:"tanggal_lahir"`
+	JenisKelamin  int       `json:"jenis_kelamin"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 func (d *Dependency) AddKid(ctx context.Context, input ParentAdminAddKidInput) (ParentAdminAddKidOutput, error) {
@@ -37,13 +39,14 @@ func (d *Dependency) AddKid(ctx context.Context, input ParentAdminAddKidInput) (
 	}
 
 	params := repo.Kid{
-		ParentID:     input.ParentID,
-		NIK:          input.NIK,
-		FullName:     input.FullName,
-		Domisili:     input.Domisili,
-		TanggalLahir: input.TanggalLahir,
-		JenisKelamin: input.JenisKelamin,
-		CreatedAt:    time.Now(),
+		ParentID:      input.ParentID,
+		AccountNumber: input.AccountNumber,
+		NIK:           input.NIK,
+		FullName:      input.FullName,
+		Domisili:      input.Domisili,
+		TanggalLahir:  input.TanggalLahir,
+		JenisKelamin:  input.JenisKelamin,
+		CreatedAt:     time.Now(),
 	}
 
 	kid, err := d.repo.SaveKid(ctx, params)
@@ -53,6 +56,7 @@ func (d *Dependency) AddKid(ctx context.Context, input ParentAdminAddKidInput) (
 
 	output.ID = kid.ID
 	output.ParentID = kid.ParentID
+	output.AccountNumber = kid.AccountNumber
 	output.NIK = kid.NIK
 	output.FullName = kid.FullName
 	output.Domisili = kid.Domisili

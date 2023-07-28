@@ -9,20 +9,22 @@ import (
 )
 
 type Kid struct {
-	ID           int
-	ParentID     int
-	NIK          string
-	FullName     string
-	Domisili     string
-	TanggalLahir string
-	JenisKelamin int
-	CreatedAt    time.Time
+	ID            int
+	ParentID      int
+	AccountNumber string
+	NIK           string
+	FullName      string
+	Domisili      string
+	TanggalLahir  string
+	JenisKelamin  int
+	CreatedAt     time.Time
 }
 
 func (d *Dependency) SaveKid(ctx context.Context, params Kid) (Kid, error) {
 	qb := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 	cols := []string{
 		"parent_id",
+		"account_number",
 		"nik",
 		"full_name",
 		"domisili",
@@ -33,7 +35,8 @@ func (d *Dependency) SaveKid(ctx context.Context, params Kid) (Kid, error) {
 	query := qb.Insert("kids").
 		Columns(cols...).
 		Values(
-			params.ParentID, params.NIK, params.FullName, params.Domisili, params.TanggalLahir,
+			params.ParentID, params.AccountNumber, params.NIK,
+			params.FullName, params.Domisili, params.TanggalLahir,
 			params.JenisKelamin, params.CreatedAt).
 		Suffix("RETURNING \"id\"")
 
@@ -51,6 +54,7 @@ func (d *Dependency) SaveKid(ctx context.Context, params Kid) (Kid, error) {
 	var output Kid
 	output.ID = id
 	output.ParentID = params.ParentID
+	output.AccountNumber = params.AccountNumber
 	output.NIK = params.NIK
 	output.FullName = params.FullName
 	output.Domisili = params.Domisili
@@ -77,6 +81,7 @@ func (d *Dependency) FindKid(ctx context.Context, col string, value any) (Kid, e
 		Scan(
 			&output.ID,
 			&output.ParentID,
+			&output.AccountNumber,
 			&output.NIK,
 			&output.FullName,
 			&output.Domisili,
@@ -113,6 +118,7 @@ func (d *Dependency) ListParentKids(ctx context.Context, parentID int) ([]Kid, e
 		err = rows.Scan(
 			&kid.ID,
 			&kid.ParentID,
+			&kid.AccountNumber,
 			&kid.NIK,
 			&kid.FullName,
 			&kid.Domisili,

@@ -14,6 +14,13 @@ func Authenticated(c *fiber.Ctx) error {
 	}
 	accessToken := strings.Split(authorization, " ")[1]
 
+	hackathonAuthorization := c.Get("X-Hackathon-Authorization")
+	if len(strings.Split(hackathonAuthorization, " ")) < 2 {
+		return fiber.NewError(fiber.StatusUnauthorized, "Please login to continue")
+	}
+
+	hackathonAccessToken := strings.Split(hackathonAuthorization, " ")[1]
+
 	_, claims, err := logic.VerifyJWT(accessToken)
 	if err != nil {
 		return fiber.NewError(fiber.StatusUnauthorized, "Please login to continue")
@@ -32,6 +39,7 @@ func Authenticated(c *fiber.Ctx) error {
 	c.Locals("userID", userID)
 	c.Locals("email", email)
 	c.Locals("accessToken", accessToken)
+	c.Locals("hackathonAccessToken", hackathonAccessToken)
 
 	return c.Next()
 }

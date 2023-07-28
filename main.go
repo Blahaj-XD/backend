@@ -39,8 +39,10 @@ func main() {
 		log.Fatal().Err(err).Msg("initialize postgres")
 	}
 
+	httpclient := platform.NewHeimdallHTTPClient()
+
 	repo := repo.New(postgres)
-	backend := backend.New(repo)
+	backend := backend.New(repo, httpclient)
 	api := api.New(backend)
 
 	signal := <-api.Start(config.Host(), config.Port())

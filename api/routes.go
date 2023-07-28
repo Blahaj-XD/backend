@@ -38,7 +38,7 @@ func (s *Server) SetupRoutes() {
 
 	authGroup := s.app.Group("/auth")
 	{
-		authGroup.Post("/register", s.Register)
+		authGroup.Post("/register", s.AuthRegister)
 		authGroup.Post("/login", s.Login)
 	}
 

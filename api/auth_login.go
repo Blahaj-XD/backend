@@ -19,7 +19,7 @@ func (s *Server) Login(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
-	output, err := s.backend.Login(c.Context(), backend.LoginInput{
+	output, err := s.backend.AuthLogin(c.Context(), backend.AuthLoginInput{
 		Username: input.Username,
 		Password: input.Password,
 	})

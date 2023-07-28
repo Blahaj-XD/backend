@@ -8,14 +8,15 @@ import (
 )
 
 type ParentAdminListKidsItem struct {
-	ID           int       `json:"id"`
-	ParentID     int       `json:"parent_id"`
-	NIK          string    `json:"nik"`
-	FullName     string    `json:"full_name"`
-	Domisili     string    `json:"domisili"`
-	TanggalLahir string    `json:"tanggal_lahir"`
-	JenisKelamin int       `json:"jenis_kelamin"`
-	CreatedAt    time.Time `json:"created_at"`
+	ID            int       `json:"id"`
+	ParentID      int       `json:"parent_id"`
+	AccountNumber string    `json:"account_number"`
+	NIK           string    `json:"nik"`
+	FullName      string    `json:"full_name"`
+	Domisili      string    `json:"domisili"`
+	TanggalLahir  string    `json:"tanggal_lahir"`
+	JenisKelamin  int       `json:"jenis_kelamin"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 type ParentAdminListKidsOutput struct {
@@ -37,6 +38,7 @@ func (d *Dependency) ParentAdminListKids(ctx context.Context, parentID int) (Par
 		var item ParentAdminListKidsItem
 		item.ID = kid.ID
 		item.ParentID = kid.ParentID
+		item.AccountNumber = kid.AccountNumber
 		item.NIK = kid.NIK
 		item.FullName = kid.FullName
 		item.Domisili = kid.Domisili

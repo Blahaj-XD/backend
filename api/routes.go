@@ -67,6 +67,9 @@ func (s *Server) SetupRoutes() {
 		parentAdminGroup.Get("/bank",
 			s.ParentAdminBankAccountInfo)
 
+		parentAdminGroup.Get("/bank/transactions",
+			s.ParentAdminBankTransactionInfo)
+
 		parentAdminGroup.Post("/bank/deposit-kid-account/:kidID",
 			s.ParentAdminBankDepositKidAccount)
 	}
@@ -76,17 +79,25 @@ func (s *Server) SetupRoutes() {
 		bankGroup.Post("/add-balance", s.BankAddBalance)
 	}
 
-	// kidsGroup := srv.app.Group("/kids", middleware.Authenticated)
-	// {
-	// 	kidsGroup.Get("/", srv.GetKidProfile)
+	kidsGroup := s.app.Group("/kids", middleware.Authenticated)
+	{
+		kidsDashboardGroup := kidsGroup.Group("/:kidID/dashboard")
+		{
+			kidsBankGroup := kidsDashboardGroup.Group("/bank")
+			{
+				kidsBankGroup.Get("/", s.KidDashboardBankAccountInfo)
+				kidsBankGroup.Get("/transactions", s.KidDashboardBankTransactionInfo)
+			}
+		}
+		// kidsGroup.Get("/", srv.GetKidProfile)
 
-	// 	kidsGroup.Get("/goals", srv.ListKidGoals)
-	// 	kidsGroup.Post("/goals", srv.AddKidGoal)
-	// 	kidsGroup.Get("/goals/:id", srv.GetKidGoal)
-	// 	kidsGroup.Delete("/goals/:id", srv.DeleteKidGoal)
+		// kidsGroup.Get("/goals", srv.ListKidGoals)
+		// kidsGroup.Post("/goals", srv.AddKidGoal)
+		// kidsGroup.Get("/goals/:id", srv.GetKidGoal)
+		// kidsGroup.Delete("/goals/:id", srv.DeleteKidGoal)
 
-	// 	kidsGroup.Get("/quests", srv.ListAvailableQuests)
-	// 	kidsGroup.Patch("/quests/take", srv.TakeQuest)
-	// 	kidsGroup.Patch("/quests/complete", srv.CompleteQuest)
-	// }
+		// kidsGroup.Get("/quests", srv.ListAvailableQuests)
+		// kidsGroup.Patch("/quests/take", srv.TakeQuest)
+		// kidsGroup.Patch("/quests/complete", srv.CompleteQuest)
+	}
 }

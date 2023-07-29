@@ -182,3 +182,21 @@ func (d *Dependency) DeleteQuest(ctx context.Context, questID int) error {
 
 	return nil
 }
+
+func (d *Dependency) AssignKidToQuest(ctx context.Context, kidID, questID int) error {
+	qb := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	sql, args, err := qb.Insert("kid_assigned_quests").
+		Columns("kid_id", "quest_id").
+		Values(kidID, questID).
+		ToSql()
+	if err != nil {
+		return errors.Wrap(err, "repo.AssignKidToQuest: ToSql")
+	}
+
+	_, err = d.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return errors.Wrap(err, "repo.AssignKidToQuest: exec sql")
+	}
+
+	return nil
+}

@@ -118,6 +118,11 @@ func (s *Server) SetupRoutes() {
 				kidsGoalsGroup.Patch("/:goalID/cancelled",
 					s.CreateKidDashboardUpdateGoalStatusHandler(repo.GoalStatusCancelled))
 			}
+
+			kidsQuestsGroup := kidsDashboardGroup.Group("/quests")
+			{
+				kidsQuestsGroup.Post("/:questID", s.KidDashboardQuestTake)
+			}
 		}
 		// kidsGroup.Get("/", srv.GetKidProfile)
 

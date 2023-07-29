@@ -63,6 +63,9 @@ func (s *Server) SetupRoutes() {
 
 		parentAdminGroup.Patch("/quests/:id/cancel",
 			s.CreateParentAdminUpdateQuestStatusHandler(repo.QuestStatusCanceled))
+
+		parentAdminGroup.Post("/bank/deposit-kid-account/:kidID",
+			s.ParentAdminBankDepositKidAccount)
 	}
 
 	bankGroup := s.app.Group("/bank", middleware.Authenticated)

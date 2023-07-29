@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS goals(
   "title" varchar(255) NOT NULL,
   "description" varchar(255) NOT NULL,
   "target_amount" decimal NOT NULL,
+  "status" smallint NOT NULL, -- 0: ongoing, 1: achieved, 2: overdue, 3: canceled
   "start_date" timestamptz NOT NULL,
   "end_date" timestamptz NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT NOW(),

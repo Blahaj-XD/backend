@@ -68,3 +68,19 @@ CREATE TABLE IF NOT EXISTS kid_assigned_quests(
   FOREIGN KEY (quest_id) REFERENCES quests(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS kid_balance_requests(
+  "id" serial PRIMARY KEY,
+  "kid_id" int NOT NULL,
+  "parent_id" int NOT NULL,
+  "from_account_number" varchar(255) NOT NULL,
+  "to_account_number" varchar(255) NOT NULL,
+  "title" varchar(255) NOT NULL,
+  "description" varchar(255) NOT NULL,
+  "amount" decimal NOT NULL,
+  "status" smallint NOT NULL, -- 0: pending, 1: accepted, 2: rejected
+  "created_at" timestamptz NOT NULL DEFAULT NOW(),
+  FOREIGN KEY (kid_id) REFERENCES kids(id) ON DELETE CASCADE,
+  FOREIGN KEY (parent_id) REFERENCES parents(id) ON DELETE CASCADE,
+  FOREIGN KEY (goal_id) REFERENCES goals(id) ON DELETE CASCADE
+);
+

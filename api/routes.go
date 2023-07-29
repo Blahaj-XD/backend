@@ -44,39 +44,52 @@ func (s *Server) SetupRoutes() {
 
 	parentAdminGroup := s.app.Group("/parent-admin", middleware.Authenticated)
 	{
-		parentAdminGroup.Get("/kids", s.ParentAdminListKids)
-		parentAdminGroup.Post("/kids", s.ParentAdminAddKid)
-		parentAdminGroup.Post("/quests", s.ParentAdminCreateQuest)
-		parentAdminGroup.Get("/quests", s.ParentAdminListQuests)
+		parentAdminKidsGroup := parentAdminGroup.Group("/kids")
+		{
+			parentAdminKidsGroup.Get("/", s.ParentAdminListKids)
+			parentAdminKidsGroup.Post("/", s.ParentAdminAddKid)
+		}
 
-		parentAdminGroup.Patch("/quests/:id/available",
-			s.CreateParentAdminUpdateQuestStatusHandler(repo.QuestStatusAvailable))
+		parentAdminQuestsGroup := parentAdminGroup.Group("/quests")
+		{
+			parentAdminQuestsGroup.Post("/", s.ParentAdminCreateQuest)
+			parentAdminQuestsGroup.Get("/", s.ParentAdminListQuests)
 
-		parentAdminGroup.Patch("/quests/:id/ongoing",
-			s.CreateParentAdminUpdateQuestStatusHandler(repo.QuestStatusOngoing))
+			parentAdminGroup.Patch("/:id/available",
+				s.CreateParentAdminUpdateQuestStatusHandler(repo.QuestStatusAvailable))
 
-		parentAdminGroup.Patch("/quests/:id/done",
-			s.CreateParentAdminUpdateQuestStatusHandler(repo.QuestStatusDone))
+			parentAdminGroup.Patch("/:id/ongoing",
+				s.CreateParentAdminUpdateQuestStatusHandler(repo.QuestStatusOngoing))
 
-		parentAdminGroup.Patch("/quests/:id/approve",
-			s.CreateParentAdminUpdateQuestStatusHandler(repo.QuestStatusApproved))
+			parentAdminGroup.Patch("/:id/done",
+				s.CreateParentAdminUpdateQuestStatusHandler(repo.QuestStatusDone))
 
-		parentAdminGroup.Patch("/quests/:id/cancel",
-			s.CreateParentAdminUpdateQuestStatusHandler(repo.QuestStatusCanceled))
+			parentAdminGroup.Patch("/:id/approve",
+				s.CreateParentAdminUpdateQuestStatusHandler(repo.QuestStatusApproved))
 
-		parentAdminGroup.Get("/bank",
-			s.ParentAdminBankAccountInfo)
+			parentAdminGroup.Patch("/:id/cancel",
+				s.CreateParentAdminUpdateQuestStatusHandler(repo.QuestStatusCanceled))
+		}
 
-		parentAdminGroup.Get("/bank/transactions",
-			s.ParentAdminBankTransactionInfo)
+		parentAdminBankGroup := parentAdminGroup.Group("/bank")
+		{
+			parentAdminBankGroup.Get("/",
+				s.ParentAdminBankAccountInfo)
 
-		parentAdminGroup.Post("/bank/deposit-kid-account/:kidID",
-			s.ParentAdminBankDepositKidAccount)
-	}
+			parentAdminBankGroup.Post("/deposit", s.BankAddBalance)
 
-	bankGroup := s.app.Group("/bank", middleware.Authenticated)
-	{
-		bankGroup.Post("/add-balance", s.BankAddBalance)
+			parentAdminBankGroup.Get("/transactions",
+				s.ParentAdminBankTransactionInfo)
+
+			parentAdminBankGroup.Post("/deposit-kid-account/:kidID",
+				s.ParentAdminBankDepositKidAccount)
+
+			parentAdminBankGroup.Post("/withdraw-kid-account/:kidID/approve",
+				s.CreateParentAdminDecideKidGoalRequestHandler(repo.KidBalanceRequestStatusApproved))
+
+			parentAdminBankGroup.Post("/withdraw-kid-account/:kidID/reject",
+				s.CreateParentAdminDecideKidGoalRequestHandler(repo.KidBalanceRequestStatusRejected))
+		}
 	}
 
 	kidsGroup := s.app.Group("/kids", middleware.Authenticated)
@@ -87,6 +100,7 @@ func (s *Server) SetupRoutes() {
 			{
 				kidsBankGroup.Get("/", s.KidDashboardBankAccountInfo)
 				kidsBankGroup.Get("/transactions", s.KidDashboardBankTransactionInfo)
+				kidsBankGroup.Post("/withdraw", s.KidDashboardBankRequestWithdraw)
 			}
 
 			kidsGoalsGroup := kidsDashboardGroup.Group("/goals")
@@ -94,6 +108,15 @@ func (s *Server) SetupRoutes() {
 				kidsGoalsGroup.Get("/", s.KidDashboardListGoals)
 				kidsGoalsGroup.Post("/", s.KidDashboardCreateGoal)
 				kidsGoalsGroup.Post("/:goalID/deposit", s.KidDashboardDepositGoal)
+
+				kidsGoalsGroup.Patch("/:goalID/ongoing",
+					s.CreateKidDashboardUpdateGoalStatusHandler(repo.GoalStatusOngoing))
+
+				kidsGoalsGroup.Patch("/:goalID/achieved",
+					s.CreateKidDashboardUpdateGoalStatusHandler(repo.GoalStatusAchieved))
+
+				kidsGoalsGroup.Patch("/:goalID/cancelled",
+					s.CreateKidDashboardUpdateGoalStatusHandler(repo.GoalStatusCancelled))
 			}
 		}
 		// kidsGroup.Get("/", srv.GetKidProfile)

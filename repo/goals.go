@@ -35,9 +35,9 @@ const (
 	// (the end date has passed). (2)
 	GoalStatusOverdue
 
-	// GoalStatusCanceled is a status for goal that is canceled
+	// GoalStatusCancelled is a status for goal that is canceled
 	// by the kid. (3)
-	GoalStatusCanceled
+	GoalStatusCancelled
 )
 
 func (s GoalStatus) String() string {
@@ -48,8 +48,8 @@ func (s GoalStatus) String() string {
 		return "achieved"
 	case GoalStatusOverdue:
 		return "overdue"
-	case GoalStatusCanceled:
-		return "canceled"
+	case GoalStatusCancelled:
+		return "cancelled"
 	default:
 		return "unknown"
 	}
@@ -190,4 +190,226 @@ func (d *Dependency) FindGoal(ctx context.Context, kidID, goalID int) (Goal, err
 	}
 
 	return output, nil
+}
+
+func (d *Dependency) UpdateGoalStatus(ctx context.Context, kidID, goalID int, status GoalStatus) error {
+	qb := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	query := qb.Update("goals").
+		Set("status", status).
+		Where(sq.Eq{"id": goalID, "kid_id": kidID})
+
+	sql, args, err := query.ToSql()
+	if err != nil {
+		return errors.Wrap(err, "repo.UpdateGoalStatus")
+	}
+
+	_, err = d.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return errors.Wrap(err, "repo.UpdateGoalStatus")
+	}
+
+	return nil
+}
+
+type KidBalanceRequest struct {
+	ID                int
+	KidID             int
+	ParentID          int
+	FromAccountNumber string
+	ToAccountNumber   string
+	Title             string
+	Description       string
+	Amount            float64
+	Status            KidBalanceRequestStatus
+	CreatedAt         time.Time
+}
+
+type KidBalanceRequestStatus int
+
+const (
+	// KidBalanceRequestStatusPending when the request is created
+	// and waiting for approval from the parent
+	KidBalanceRequestStatusPending KidBalanceRequestStatus = iota
+
+	// KidBalanceRequestStatusApproved when the request is approved
+	// by the parent
+	KidBalanceRequestStatusApproved
+
+	// KidBalanceRequestStatusRejected when the request is rejected
+	// by the parent
+	KidBalanceRequestStatusRejected
+)
+
+func (s KidBalanceRequestStatus) String() string {
+	switch s {
+	case KidBalanceRequestStatusPending:
+		return "pending"
+	case KidBalanceRequestStatusApproved:
+		return "approved"
+	case KidBalanceRequestStatusRejected:
+		return "rejected"
+	default:
+		return "unknown"
+	}
+}
+
+func (d *Dependency) NewKidBalanceRequest(ctx context.Context, params KidBalanceRequest) (KidBalanceRequest, error) {
+	qb := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	cols := []string{
+		"kid_id",
+		"parent_id",
+		"from_account_number",
+		"to_account_number",
+		"title",
+		"description",
+		"amount",
+		"status",
+		"created_at"}
+
+	query := qb.Insert("kid_balance_requests").
+		Columns(cols...).
+		Values(
+			params.KidID, params.ParentID, params.Title,
+			params.FromAccountNumber, params.ToAccountNumber, params.Description,
+			params.Amount, params.Status, params.CreatedAt).
+		Suffix("RETURNING \"id\"")
+
+	sql, args, err := query.ToSql()
+	if err != nil {
+		return KidBalanceRequest{}, errors.Wrap(err, "repo.NewKidBalanceRequest")
+	}
+
+	var id int
+	err = d.db.QueryRow(ctx, sql, args...).Scan(&id)
+	if err != nil {
+		return KidBalanceRequest{}, errors.Wrap(err, "repo.NewKidBalanceRequest")
+	}
+
+	var output KidBalanceRequest
+	output.ID = id
+	output.KidID = params.KidID
+	output.ParentID = params.ParentID
+	output.Title = params.Title
+	output.Description = params.Description
+	output.Amount = params.Amount
+	output.Status = params.Status
+	output.CreatedAt = params.CreatedAt
+
+	return output, nil
+}
+
+func (d *Dependency) ListKidBalanceRequest(ctx context.Context, col string, value any) ([]KidBalanceRequest, error) {
+	qb := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	cols := []string{
+		"id",
+		"kid_id",
+		"parent_id",
+		"from_account_number",
+		"to_account_number",
+		"title",
+		"description",
+		"amount",
+		"status",
+		"created_at",
+	}
+
+	query := qb.Select(cols...).
+		From("kid_balance_requests").
+		OrderBy("created_at DESC")
+
+	sql, args, err := query.ToSql()
+	if err != nil {
+		return nil, errors.Wrap(err, "repo.ListKidBalanceRequest")
+	}
+
+	rows, err := d.db.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, errors.Wrap(err, "repo.ListKidBalanceRequest")
+	}
+	defer rows.Close()
+
+	var output []KidBalanceRequest
+	for rows.Next() {
+		var item KidBalanceRequest
+		err := rows.Scan(
+			&item.ID,
+			&item.KidID,
+			&item.ParentID,
+			&item.FromAccountNumber,
+			&item.ToAccountNumber,
+			&item.Title,
+			&item.Description,
+			&item.Amount,
+			&item.Status,
+			&item.CreatedAt)
+		if err != nil {
+			return nil, errors.Wrap(err, "repo.ListKidBalanceRequest")
+		}
+
+		output = append(output, item)
+	}
+
+	return output, nil
+}
+
+func (d *Dependency) FindKidBalanceRequest(ctx context.Context, id int) (KidBalanceRequest, error) {
+	qb := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	cols := []string{
+		"id",
+		"kid_id",
+		"parent_id",
+		"from_account_number",
+		"to_account_number",
+		"title",
+		"description",
+		"amount",
+		"status",
+		"created_at",
+	}
+
+	query := qb.Select(cols...).
+		From("kid_balance_requests").
+		Where(sq.Eq{"id": id})
+
+	sql, args, err := query.ToSql()
+	if err != nil {
+		return KidBalanceRequest{}, errors.Wrap(err, "repo.FindKidBalanceRequest")
+	}
+
+	var output KidBalanceRequest
+	err = d.db.QueryRow(ctx, sql, args...).Scan(
+		&output.ID,
+		&output.KidID,
+		&output.ParentID,
+		&output.FromAccountNumber,
+		&output.ToAccountNumber,
+		&output.Title,
+		&output.Description,
+		&output.Amount,
+		&output.Status,
+		&output.CreatedAt)
+	if err != nil {
+		return KidBalanceRequest{}, errors.Wrap(err, "repo.FindKidBalanceRequest")
+	}
+
+	return output, nil
+}
+
+func (d *Dependency) UpdateKidBalanceRequestStatus(ctx context.Context, id int, status KidBalanceRequestStatus) error {
+	qb := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	query := qb.Update("kid_balance_requests").
+		Set("status", status).
+		Where(sq.Eq{"id": id})
+
+	sql, args, err := query.ToSql()
+	if err != nil {
+		return errors.Wrap(err, "repo.UpdateKidBalanceRequestStatus")
+	}
+
+	_, err = d.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return errors.Wrap(err, "repo.UpdateKidBalanceRequestStatus")
+	}
+
+	return nil
 }

@@ -30,7 +30,7 @@ func (d *Dependency) KidDashboardDepositGoal(ctx context.Context, input KidDashb
 	}
 
 	if goal.Status != repo.GoalStatusOngoing {
-		return ErrGoalNotFound
+		return ErrCantDepositToGoalWhenNotOngoing
 	}
 
 	err = d.BankAccountCreateTransaction(ctx, BankAccountCreateTransactionInput{

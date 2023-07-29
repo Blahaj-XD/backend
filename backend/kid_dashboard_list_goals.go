@@ -3,6 +3,9 @@ package backend
 import (
 	"context"
 	"time"
+
+	"github.com/BlahajXD/backend/repo"
+	"github.com/pkg/errors"
 )
 
 type KidDashboardListGoalsItem struct {
@@ -56,6 +59,25 @@ func (d *Dependency) KidDashboardListGoals(ctx context.Context, input KidDashboa
 		if err != nil {
 			return KidDashboardListGoalsOutput{}, err
 		}
+
+		// check if goal is overdue
+		if goal.Status == repo.GoalStatusOngoing && time.Now().After(goal.EndDate) {
+			goal.Status = repo.GoalStatusOverdue
+			err := d.repo.UpdateGoalStatus(ctx, kid.ID, goal.ID, repo.GoalStatusOverdue)
+			if err != nil {
+				return KidDashboardListGoalsOutput{}, errors.Wrap(err, "KidDashboardListGoals: update goal status")
+			}
+		}
+
+		// mark goal as completed if target amount is reached before end date
+		if goal.Status == repo.GoalStatusOngoing && info.Balance >= goal.TargetAmount {
+			goal.Status = repo.GoalStatusAchieved
+			err := d.repo.UpdateGoalStatus(ctx, kid.ID, goal.ID, repo.GoalStatusAchieved)
+			if err != nil {
+				return KidDashboardListGoalsOutput{}, errors.Wrap(err, "KidDashboardListGoals: update goal status")
+			}
+		}
+
 		output.Items = append(output.Items, KidDashboardListGoalsItem{
 			ID:            goal.ID,
 			KidID:         goal.KidID,

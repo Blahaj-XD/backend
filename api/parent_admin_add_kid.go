@@ -26,9 +26,9 @@ func (s *Server) ParentAdminAddKid(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusUnprocessableEntity, err.Error())
 	}
 
-	accountNumber, err := s.backend.HackathonCreateBankAccount(backend.HackathonCreateBankAccountInput{
+	accountNumber, err := s.backend.BankCreateBankAccount(backend.BankCreateBankAccountInput{
 		Balance:     0,
-		AccessToken: c.Locals("hackathonAccessToken").(string),
+		AccessToken: c.Locals("bankAccessToken").(string),
 	})
 	if err != nil {
 		return fiber.NewError(fiber.StatusServiceUnavailable, err.Error())

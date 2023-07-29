@@ -11,18 +11,18 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type HackathonGenerateTokenInput struct {
+type BankGenerateTokenInput struct {
 	Username      string `json:"username"`
 	LoginPassword string `json:"loginPassword"`
 }
 
-func (d *Dependency) HackathonGenerateToken(input HackathonGenerateTokenInput) (string, error) {
+func (d *Dependency) BankGenerateToken(input BankGenerateTokenInput) (string, error) {
 	payload := map[string]interface{}{
 		"username":      input.Username,
 		"loginPassword": input.LoginPassword,
 	}
 
-	log.Debug().Interface("payload", payload).Msg("hackathon: generate token payload")
+	log.Debug().Interface("payload", payload).Msg("bank: generate token payload")
 
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
@@ -42,25 +42,25 @@ func (d *Dependency) HackathonGenerateToken(input HackathonGenerateTokenInput) (
 	header := http.Header{}
 	header.Add(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
 
-	response, err := d.httpclient.Post(config.HackathonApiURL()+"/user/auth/token", bytes.NewReader(jsonPayload), header)
+	response, err := d.httpclient.Post(config.BankApiURL()+"/user/auth/token", bytes.NewReader(jsonPayload), header)
 	if err != nil {
-		return "", errors.Wrap(err, "hackathon: failed to send request")
+		return "", errors.Wrap(err, "bank: failed to send request")
 	}
 
 	var apiResponseData apiResponse
 	err = json.NewDecoder(response.Body).Decode(&apiResponseData)
 	if err != nil {
-		return "", errors.Wrap(err, "hackathon: failed to decode response")
+		return "", errors.Wrap(err, "bank: failed to decode response")
 	}
 
-	log.Debug().Interface("apiResponseData", apiResponseData).Msg("hackathon: api response data")
+	log.Debug().Interface("apiResponseData", apiResponseData).Msg("bank: api response data")
 
 	if !apiResponseData.Success {
 		if apiResponseData.ErrCode == "1025" {
 			return "", errors.Wrap(ErrHasNoDataPermission, apiResponseData.ErrMsg)
 		}
 
-		return "", errors.Wrap(ErrHackathonUnknownError, apiResponseData.ErrMsg)
+		return "", errors.Wrap(ErrBankUnknownError, apiResponseData.ErrMsg)
 	}
 
 	return apiResponseData.Data.AccessToken, nil

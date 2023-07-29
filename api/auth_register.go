@@ -39,8 +39,8 @@ func (s *Server) AuthRegister(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusUnprocessableEntity, err.Error())
 	}
 
-	log.Debug().Msg("Registering user in hackathon 3rd party API")
-	uid, err := s.backend.HackathonCreateUser(backend.HackathonCreateUserInput{
+	log.Debug().Msg("Registering user in bank 3rd party API")
+	uid, err := s.backend.BankCreateUser(backend.BankCreateUserInput{
 		KTPID:         body.NIK,
 		Username:      body.Username,
 		Email:         body.Email,
@@ -50,48 +50,48 @@ func (s *Server) AuthRegister(c *fiber.Ctx) error {
 		Gender:        body.JenisKelamin,
 	})
 	if err != nil {
-		if errors.Is(err, backend.ErrHackathonRequestParameter) {
-			log.Debug().Msg("Error registering user in hackathon 3rd party API: ErrHackathonRequestParameter")
+		if errors.Is(err, backend.ErrBankRequestParameter) {
+			log.Debug().Msg("Error registering user in bank 3rd party API: ErrBankRequestParameter")
 			errMsg := errors.Unwrap(err)
 			return fiber.NewError(fiber.StatusUnprocessableEntity, errMsg.Error())
 		}
 
 		if errors.Is(err, backend.ErrUserAlreadyExists) {
-			log.Debug().Msg("Error registering user in hackathon 3rd party API: ErrUserAlreadyExists")
+			log.Debug().Msg("Error registering user in bank 3rd party API: ErrUserAlreadyExists")
 			return fiber.NewError(fiber.StatusConflict, err.Error())
 		}
 
-		log.Debug().Msg("Error registering user in hackathon 3rd party API: ErrServiceUnavailable")
+		log.Debug().Msg("Error registering user in bank 3rd party API: ErrServiceUnavailable")
 		return fiber.NewError(fiber.StatusServiceUnavailable, err.Error())
 	}
 
-	accessToken, err := s.backend.HackathonGenerateToken(backend.HackathonGenerateTokenInput{
+	accessToken, err := s.backend.BankGenerateToken(backend.BankGenerateTokenInput{
 		Username:      body.Username,
 		LoginPassword: body.Password,
 	})
 	if err != nil {
 		if errors.Is(err, backend.ErrHasNoDataPermission) {
-			log.Debug().Msg("Error generating token in hackathon 3rd party API: ErrHasNoDataPermission")
+			log.Debug().Msg("Error generating token in bank 3rd party API: ErrHasNoDataPermission")
 			errMsg := errors.Unwrap(err)
 			return fiber.NewError(fiber.StatusUnprocessableEntity, errMsg.Error())
 		}
 
-		log.Debug().Msg("Error generating token in hackathon 3rd party API: ErrServiceUnavailable")
+		log.Debug().Msg("Error generating token in bank 3rd party API: ErrServiceUnavailable")
 		return fiber.NewError(fiber.StatusServiceUnavailable, err.Error())
 	}
 
-	accountNumber, err := s.backend.HackathonCreateBankAccount(backend.HackathonCreateBankAccountInput{
+	accountNumber, err := s.backend.BankCreateBankAccount(backend.BankCreateBankAccountInput{
 		Balance:     0,
 		AccessToken: accessToken,
 	})
 	if err != nil {
 		if errors.Is(err, backend.ErrHasNoDataPermission) {
-			log.Debug().Msg("Error creating bank account in hackathon 3rd party API: ErrHasNoDataPermission")
+			log.Debug().Msg("Error creating bank account in bank 3rd party API: ErrHasNoDataPermission")
 			errMsg := errors.Unwrap(err)
 			return fiber.NewError(fiber.StatusUnprocessableEntity, errMsg.Error())
 		}
 
-		log.Debug().Msg("Error creating bank account in hackathon 3rd party API: ErrServiceUnavailable")
+		log.Debug().Msg("Error creating bank account in bank 3rd party API: ErrServiceUnavailable")
 		return fiber.NewError(fiber.StatusServiceUnavailable, err.Error())
 	}
 

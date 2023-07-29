@@ -11,7 +11,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type HackathonCreateUserInput struct {
+type BankCreateUserInput struct {
 	KTPID         string `json:"ktpId"`
 	Username      string `json:"username"`
 	LoginPassword string `json:"loginPassword"`
@@ -21,7 +21,7 @@ type HackathonCreateUserInput struct {
 	Email         string `json:"email"`
 }
 
-func (d *Dependency) HackathonCreateUser(input HackathonCreateUserInput) (int, error) {
+func (d *Dependency) BankCreateUser(input BankCreateUserInput) (int, error) {
 	payload := map[string]any{
 		"ktpId":         input.KTPID,
 		"username":      input.Username,
@@ -32,7 +32,7 @@ func (d *Dependency) HackathonCreateUser(input HackathonCreateUserInput) (int, e
 		"email":         input.Email,
 	}
 
-	log.Debug().Interface("payload", payload).Msg("hackathon_create_user: create user payload")
+	log.Debug().Interface("payload", payload).Msg("bank_create_user: create user payload")
 
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
@@ -40,7 +40,7 @@ func (d *Dependency) HackathonCreateUser(input HackathonCreateUserInput) (int, e
 		return 0, errors.Wrap(err, "failed to marshal payload")
 	}
 
-	log.Debug().Str("payload", string(jsonPayload)).Msg("hackathon_create_user: create user payload")
+	log.Debug().Str("payload", string(jsonPayload)).Msg("bank_create_user: create user payload")
 
 	type apiResponse struct {
 		TraceId string `json:"traceId"`
@@ -63,32 +63,32 @@ func (d *Dependency) HackathonCreateUser(input HackathonCreateUserInput) (int, e
 	header := http.Header{}
 	header.Add(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
 
-	response, err := d.httpclient.Post(config.HackathonApiURL()+"/user/auth/create", bytes.NewReader(jsonPayload), header)
+	response, err := d.httpclient.Post(config.BankApiURL()+"/user/auth/create", bytes.NewReader(jsonPayload), header)
 	if err != nil {
-		log.Error().Err(err).Msg("hackathon_create_user: failed to send request")
-		return 0, errors.Wrap(err, "hackathon_create_user: failed to send request")
+		log.Error().Err(err).Msg("bank_create_user: failed to send request")
+		return 0, errors.Wrap(err, "bank_create_user: failed to send request")
 	}
 
-	log.Debug().Msg("hackathon_create_user: sent request")
+	log.Debug().Msg("bank_create_user: sent request")
 
 	var apiResponseData apiResponse
 	err = json.NewDecoder(response.Body).Decode(&apiResponseData)
 	if err != nil {
-		return 0, errors.Wrap(err, "hackathon_create_user: failed to decode response")
+		return 0, errors.Wrap(err, "bank_create_user: failed to decode response")
 	}
 
-	log.Debug().Interface("apiResponseData", apiResponseData).Msg("hackathon_create_user: api response data")
+	log.Debug().Interface("apiResponseData", apiResponseData).Msg("bank_create_user: api response data")
 
 	if !apiResponseData.Success {
 		if apiResponseData.ErrCode == "1020" {
-			return 0, errors.Wrap(ErrHackathonRequestParameter, apiResponseData.ErrMsg)
+			return 0, errors.Wrap(ErrBankRequestParameter, apiResponseData.ErrMsg)
 		}
 
 		if apiResponseData.ErrCode == "4873" {
 			return 0, ErrUserAlreadyExists
 		}
 
-		return 0, errors.Wrap(ErrHackathonUnknownError, apiResponseData.ErrMsg)
+		return 0, errors.Wrap(ErrBankUnknownError, apiResponseData.ErrMsg)
 	}
 
 	return apiResponseData.Data.UID, nil

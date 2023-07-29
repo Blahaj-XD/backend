@@ -15,9 +15,9 @@ type AuthLoginInput struct {
 }
 
 type AuthLoginOutput struct {
-	AccessToken          string `json:"access_token"`
-	HackathonAccessToken string `json:"hackathon_access_token"`
-	User                 struct {
+	AccessToken     string `json:"access_token"`
+	BankAccessToken string `json:"bank_access_token"`
+	User            struct {
 		ID            int    `json:"id"`
 		UID           int    `json:"uid"`
 		AccountNumber string `json:"account_number"`
@@ -56,17 +56,17 @@ func (d *Dependency) AuthLogin(ctx context.Context, input AuthLoginInput) (AuthL
 		return AuthLoginOutput{}, ErrInvalidCredentials
 	}
 
-	hackathonAccessToken, err := d.HackathonGenerateToken(HackathonGenerateTokenInput{
+	bankAccessToken, err := d.BankGenerateToken(BankGenerateTokenInput{
 		Username:      user.Username,
 		LoginPassword: input.Password,
 	})
 	if err != nil {
-		return AuthLoginOutput{}, errors.Wrap(err, "backend.Login -> HackathonGenerateToken")
+		return AuthLoginOutput{}, errors.Wrap(err, "backend.Login -> BankGenerateToken")
 	}
 
 	var output AuthLoginOutput
 	output.AccessToken = accessToken
-	output.HackathonAccessToken = hackathonAccessToken
+	output.BankAccessToken = bankAccessToken
 	output.User.ID = user.ID
 	output.User.UID = user.UID
 	output.User.AccountNumber = user.AccountNumber

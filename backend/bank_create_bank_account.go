@@ -11,12 +11,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type HackathonCreateBankAccountInput struct {
+type BankCreateBankAccountInput struct {
 	Balance     float64 `json:"balance"`
 	AccessToken string
 }
 
-func (d *Dependency) HackathonCreateBankAccount(input HackathonCreateBankAccountInput) (string, error) {
+func (d *Dependency) BankCreateBankAccount(input BankCreateBankAccountInput) (string, error) {
 	payload := map[string]any{
 		"balance":      input.Balance,
 		"access_token": input.AccessToken,
@@ -27,7 +27,7 @@ func (d *Dependency) HackathonCreateBankAccount(input HackathonCreateBankAccount
 		return "", errors.Wrap(err, "failed to marshal payload")
 	}
 
-	log.Debug().Interface("payload", payload).Msg("hackathon_create_bank_account: create bank account payload")
+	log.Debug().Interface("payload", payload).Msg("bank_create_bank_account: create bank account payload")
 
 	type apiResponse struct {
 		TraceId string `json:"traceId"`
@@ -49,12 +49,12 @@ func (d *Dependency) HackathonCreateBankAccount(input HackathonCreateBankAccount
 	header.Add(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
 	header.Add(fiber.HeaderAuthorization, "Bearer "+input.AccessToken)
 
-	response, err := d.httpclient.Post(config.HackathonApiURL()+"/bankAccount/create", bytes.NewReader(jsonPayload), header)
+	response, err := d.httpclient.Post(config.BankApiURL()+"/bankAccount/create", bytes.NewReader(jsonPayload), header)
 	if err != nil {
-		return "", errors.Wrap(err, "hackathon_create_bank_account: failed to send request")
+		return "", errors.Wrap(err, "bank_create_bank_account: failed to send request")
 	}
 
-	log.Debug().Msg("hackathon_create_bank_account: create bank account response")
+	log.Debug().Msg("bank_create_bank_account: create bank account response")
 
 	// if config.Environment() == "dev" {
 	// 	body, _ := ioutil.ReadAll(response.Body)
@@ -64,11 +64,11 @@ func (d *Dependency) HackathonCreateBankAccount(input HackathonCreateBankAccount
 	var apiResponseData apiResponse
 	err = json.NewDecoder(response.Body).Decode(&apiResponseData)
 	if err != nil {
-		log.Debug().Msg("hackathon_create_bank_account: failed to decode response")
-		return "", errors.Wrap(err, "hackathon_create_bank_account: failed to decode response")
+		log.Debug().Msg("bank_create_bank_account: failed to decode response")
+		return "", errors.Wrap(err, "bank_create_bank_account: failed to decode response")
 	}
 
-	log.Debug().Interface("apiResponseData", apiResponseData).Msg("hackathon_create_bank_account: api response data")
+	log.Debug().Interface("apiResponseData", apiResponseData).Msg("bank_create_bank_account: api response data")
 
 	if !apiResponseData.Success {
 		if apiResponseData.ErrCode == "1025" {

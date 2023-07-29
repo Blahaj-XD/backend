@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/BlahajXD/backend/logic"
 	"github.com/BlahajXD/backend/repo"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
@@ -32,8 +31,7 @@ type AuthRegisterInput struct {
 }
 
 type AuthRegisterOutput struct {
-	AccessToken string `json:"access_token"`
-	User        struct {
+	User struct {
 		ID            int    `json:"id"`
 		UID           int    `json:"uid"`
 		AccountNumber string `json:"account_number"`
@@ -115,16 +113,7 @@ func (d *Dependency) AuthRegister(ctx context.Context, input AuthRegisterInput) 
 		return AuthRegisterOutput{}, errors.Wrap(err, "backend.SaveParent -> d.repo.SaveParent")
 	}
 
-	accessToken, err := logic.GenerateJWT(map[string]any{
-		"userID": userID,
-		"email":  input.Email,
-	})
-	if err != nil {
-		return AuthRegisterOutput{}, errors.Wrap(err, "backend.SaveParent -> logic.GenerateJWT")
-	}
-
 	var output AuthRegisterOutput
-	output.AccessToken = accessToken
 	output.User.ID = userID
 	output.User.UID = input.UID
 	output.User.AccountNumber = input.AccountNumber

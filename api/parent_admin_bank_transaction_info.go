@@ -22,6 +22,9 @@ func (s *Server) ParentAdminBankTransactionInfo(c *fiber.Ctx) error {
 		if errors.Is(err, backend.ErrNotFoundBankAccount) {
 			return fiber.NewError(fiber.StatusNotFound, err.Error())
 		}
+		if errors.Is(err, backend.ErrBankTransactionNotExists) {
+			return fiber.NewError(fiber.StatusNotFound, err.Error())
+		}
 		return fiber.NewError(fiber.StatusServiceUnavailable, err.Error())
 	}
 

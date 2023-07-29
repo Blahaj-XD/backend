@@ -34,6 +34,8 @@ func (s *Server) AuthRegister(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
+	log.Debug().Interface("body", body).Msg("Body parsed")
+
 	if err := body.Validate(); err != nil {
 		log.Debug().Msg("Error validating body")
 		return fiber.NewError(fiber.StatusUnprocessableEntity, err.Error())

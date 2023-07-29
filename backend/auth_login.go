@@ -41,7 +41,7 @@ type AuthLoginOutput struct {
 func (d *Dependency) AuthLogin(ctx context.Context, input AuthLoginInput) (AuthLoginOutput, error) {
 	user, err := d.repo.FindParent(ctx, "username", input.Username)
 	if err != nil {
-		return AuthLoginOutput{}, errors.Wrap(err, "backend.Login -> repo.FindParent")
+		return AuthLoginOutput{}, ErrInvalidCredentials
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {

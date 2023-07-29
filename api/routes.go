@@ -27,6 +27,7 @@ func (s *Server) SetupRoutes() {
 			fiber.HeaderAuthorization,
 			fiber.HeaderContentType,
 			fiber.HeaderAccept,
+			"X-Bank-Authorization",
 		}, ","),
 	})
 
@@ -40,6 +41,7 @@ func (s *Server) SetupRoutes() {
 	{
 		authGroup.Post("/register", s.AuthRegister)
 		authGroup.Post("/login", s.Login)
+		authGroup.Get("/verify", s.AuthVerify)
 	}
 
 	parentAdminGroup := s.app.Group("/parent-admin", middleware.Authenticated)

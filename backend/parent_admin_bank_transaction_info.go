@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
 )
 
 type ParentAdminBankTransactionInfoInput struct {
@@ -57,8 +58,10 @@ func (d *Dependency) ParentAdminBankTransactionInfo(ctx context.Context, input P
 		if transaction.AccountNo == "0000000000" {
 			item.KidName = "-"
 		} else {
+			log.Debug().Interface("transaction", transaction).Msg("backend.ParentAdminBankTransactionInfo")
 			kid, err := d.repo.FindKid(ctx, "account_number", transaction.ReceiverAccountNo)
 			if err != nil {
+				log.Error().Err(err).Str("account_number", transaction.ReceiverAccountNo).Msg("backend.ParentAdminBankTransactionInfo -> FindKid")
 				return ParentAdminBankTransactionInfoOutput{}, errors.Wrap(err, "backend.ParentAdminBankTransactionInfo -> FindKid")
 			}
 			item.KidName = kid.FullName

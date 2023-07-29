@@ -89,6 +89,9 @@ func (d *Dependency) BankTransactionInfo(input BankTransactionInfoInput) (BankTr
 		if apiResponseData.ErrCode == "4874" {
 			return BankTransactionInfoOutput{}, ErrUserNotFound
 		}
+		if apiResponseData.ErrCode == "4503" {
+			return BankTransactionInfoOutput{}, ErrBankTransactionNotExists
+		}
 
 		return BankTransactionInfoOutput{}, errors.Wrap(ErrBankUnknownError, apiResponseData.ErrMsg)
 	}

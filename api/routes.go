@@ -88,6 +88,13 @@ func (s *Server) SetupRoutes() {
 				kidsBankGroup.Get("/", s.KidDashboardBankAccountInfo)
 				kidsBankGroup.Get("/transactions", s.KidDashboardBankTransactionInfo)
 			}
+
+			kidsGoalsGroup := kidsDashboardGroup.Group("/goals")
+			{
+				kidsGoalsGroup.Get("/", s.KidDashboardListGoals)
+				kidsGoalsGroup.Post("/", s.KidDashboardCreateGoal)
+				kidsGoalsGroup.Post("/:goalID/deposit", s.KidDashboardDepositGoal)
+			}
 		}
 		// kidsGroup.Get("/", srv.GetKidProfile)
 

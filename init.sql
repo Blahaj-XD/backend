@@ -38,7 +38,6 @@ CREATE TABLE IF NOT EXISTS goals(
   "kid_id" int NOT NULL,
   "account_number" varchar(255) NOT NULL,
   "title" varchar(255) NOT NULL,
-  "description" varchar(255) NOT NULL,
   "target_amount" decimal NOT NULL,
   "status" smallint NOT NULL, -- 0: ongoing, 1: achieved, 2: overdue, 3: canceled
   "start_date" timestamptz NOT NULL,

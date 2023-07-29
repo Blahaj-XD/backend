@@ -54,7 +54,7 @@ func (d *Dependency) BankCreateBankAccount(input BankCreateBankAccountInput) (st
 		return "", errors.Wrap(err, "bank_create_bank_account: failed to send request")
 	}
 
-	log.Debug().Msg("bank_create_bank_account: create bank account response")
+	log.Debug().Msg("bank_create_bank_account: create bank account sent request")
 
 	// if config.Environment() == "dev" {
 	// 	body, _ := ioutil.ReadAll(response.Body)

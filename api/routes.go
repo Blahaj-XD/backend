@@ -65,6 +65,11 @@ func (s *Server) SetupRoutes() {
 			s.CreateParentAdminUpdateQuestStatusHandler(repo.QuestStatusCanceled))
 	}
 
+	bankGroup := s.app.Group("/bank", middleware.Authenticated)
+	{
+		bankGroup.Post("/add-balance", s.BankAddBalance)
+	}
+
 	// kidsGroup := srv.app.Group("/kids", middleware.Authenticated)
 	// {
 	// 	kidsGroup.Get("/", srv.GetKidProfile)
